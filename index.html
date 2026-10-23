@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>Magic Masters Swimming</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Masters swimming squads and private lessons with coach Lisa Marangon at Prince Alfred Park Pool, Surry Hills, Sydney. All levels, all year round.">
 <meta property="og:title" content="Magic Masters Swimming">
 <meta property="og:description" content="Masters squads and private lessons with Lisa Marangon at Prince Alfred Park Pool, Sydney.">
-<meta property="og:image" content="assets/img/pool-lanes.jpg">
+<meta property="og:image" content="https://zapiolaesteban.github.io/magic-masters-swimming/assets/img/pool-lanes.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23032f66'/%3E%3Crect x='5' y='15' width='22' height='3' fill='%2320b9b3'/%3E%3Crect x='14' y='15' width='5' height='3' fill='%23ce3457'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +21,7 @@
   --ink: #0b2340;         /* deep lane-line navy */
   --ink-2: #4b6275;
   --line: rgba(11, 35, 64, 0.13);
+  --field: #7a8b9a;       /* input borders, 3:1+ on canvas */
   --aqua: #20b9b3;        /* logo aqua: fills only */
   --aqua-ink: #0c7a75;    /* aqua dark enough for text */
   --on-aqua: #04211f;
@@ -45,13 +45,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --canvas: #071a2b; --surface: #0c2438; --ink: #e8f2f4; --ink-2: #9db4c2;
-    --line: rgba(232, 242, 244, 0.14); --aqua: #2fcfc7; --aqua-ink: #5ddbd4; --on-aqua: #04211f;
+    --line: rgba(232, 242, 244, 0.14); --field: #6b8597; --aqua: #2fcfc7; --aqua-ink: #5ddbd4; --on-aqua: #04211f;
     --rope-blue: #3b84e6; --rope-red: #ec5577; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --canvas: #071a2b; --surface: #0c2438; --ink: #e8f2f4; --ink-2: #9db4c2;
-  --line: rgba(232, 242, 244, 0.14); --aqua: #2fcfc7; --aqua-ink: #5ddbd4; --on-aqua: #04211f;
+  --line: rgba(232, 242, 244, 0.14); --field: #6b8597; --aqua: #2fcfc7; --aqua-ink: #5ddbd4; --on-aqua: #04211f;
   --rope-blue: #3b84e6; --rope-red: #ec5577; color-scheme: dark;
 }
 
@@ -73,7 +73,7 @@ body::before {
 }
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; }
-:focus-visible { outline: 3px solid var(--aqua); outline-offset: 3px; border-radius: 2px; }
+:focus-visible { outline: 3px solid var(--aqua-ink); outline-offset: 3px; border-radius: 2px; }
 
 .wrap {
   max-width: var(--max);
@@ -94,8 +94,10 @@ p { margin: 0; text-wrap: pretty; }
   background: var(--canvas);
   border-bottom: 1px solid var(--line);
 }
-.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 14px; }
+.top .wrap { display: flex; align-items: center; gap: 12px 28px; padding-block: 12px; }
+.top .mark { margin-right: auto; }
 .top nav { display: flex; align-items: center; gap: 28px; font-size: var(--step--1); font-weight: 520; }
+.top nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .top nav a:not(.btn) { text-decoration: none; color: var(--ink-2); }
 .top nav a:not(.btn):hover { color: var(--ink); }
 
@@ -109,7 +111,7 @@ p { margin: 0; text-wrap: pretty; }
 .btn-primary:hover { background: color-mix(in srgb, var(--aqua) 82%, var(--ink)); }
 .btn-ghost { border-color: var(--ink); color: var(--ink); background: transparent; }
 .btn-ghost:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
-.top .btn { min-height: 40px; padding-inline: 18px; }
+.top .btn { min-height: 44px; padding-inline: 18px; }
 
 /* Hero */
 .hero .wrap { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(48px, 9vw, 112px) clamp(36px, 5vw, 56px); align-items: end; }
@@ -134,7 +136,7 @@ p { margin: 0; text-wrap: pretty; }
 /* Sections: heading rail left, content right */
 .section .wrap { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(64px, 9vw, 120px); }
 .section + .section .wrap { border-top: 1px solid var(--line); }
-.rail { grid-column: 1 / span 4; display: grid; gap: 16px; align-content: start; }
+.rail { grid-column: 1 / span 4; display: grid; gap: 16px; align-content: start; position: sticky; top: 96px; align-self: start; }
 .rail h2 { font-size: var(--step-3); }
 .rail p { color: var(--ink-2); max-width: 34ch; }
 .body { grid-column: 6 / span 7; display: grid; gap: 32px; min-width: 0; }
@@ -160,7 +162,7 @@ p { margin: 0; text-wrap: pretty; }
 .pool { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; }
 .pool img { border-radius: var(--radius); aspect-ratio: 495 / 400; object-fit: cover; }
 .pool p { font-size: var(--step--1); color: var(--ink-2); }
-.pool a { color: var(--aqua-ink); font-weight: 600; }
+.pool a { color: var(--aqua-ink); font-weight: 600; display: inline-block; padding-block: 10px; }
 
 /* Private lessons */
 .lessons .body { grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
@@ -181,6 +183,7 @@ p { margin: 0; text-wrap: pretty; }
 .stat { display: grid; gap: 4px; }
 .stat b { font-variation-settings: var(--wide); font-weight: 800; font-size: var(--step-3); line-height: 1; font-variant-numeric: tabular-nums; }
 .stat span { font-size: var(--step--1); color: var(--ink-2); }
+.about .career, .about .more { grid-column: 1 / -1; }
 .career { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line); font-size: var(--step--1); }
 .career li { display: grid; grid-template-columns: 78px 1fr; gap: 12px; padding-block: 11px; border-bottom: 1px solid var(--line); }
 .career time { font-weight: 650; font-variant-numeric: tabular-nums; }
@@ -192,9 +195,9 @@ form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 label { font-size: var(--step--1); font-weight: 600; }
 input, select, textarea {
   font: inherit; font-size: var(--step-0); color: var(--ink); background: var(--surface);
-  border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px 14px; width: 100%;
+  border: 1.5px solid var(--field); border-radius: var(--radius); padding: 12px 14px; width: 100%;
 }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px color-mix(in srgb, var(--aqua) 25%, transparent); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--aqua-ink); outline-offset: 1px; border-color: var(--aqua-ink); }
 textarea { min-height: 140px; resize: vertical; }
 .form-end { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
 .status { font-size: var(--step--1); color: var(--ink-2); }
@@ -207,10 +210,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   .hero-copy { grid-column: 1 / -1; }
   .facts { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
   .rail, .body { grid-column: 1 / -1; }
-  .rail { margin-bottom: 8px; }
+  .rail { margin-bottom: 8px; position: static; }
 }
 @media (max-width: 720px) {
-  .top nav a:not(.btn) { display: none; }
+  html { scroll-padding-top: 140px; }
+  .top .wrap { flex-wrap: wrap; }
+  .top nav { order: 3; width: 100%; gap: 22px; border-top: 1px solid var(--line); }
   .facts { grid-template-columns: 1fr; gap: 12px; }
   .lane { grid-template-columns: 1fr 1fr; gap: 16px 20px; }
   .lane .name { grid-column: 1 / -1; }
@@ -235,8 +240,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#squads">Squads</a>
       <a href="#lessons">Private lessons</a>
       <a href="#about">About Lisa</a>
-      <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
     </nav>
+    <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
   </div>
 </header>
 
@@ -254,7 +259,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <dl class="facts">
         <div><dt>Pool</dt><dd>Prince Alfred Park Pool, Surry&nbsp;Hills</dd></div>
         <div><dt>Squads</dt><dd>Monday to Friday, year&#8209;round</dd></div>
-        <div><dt>Coach</dt><dd>Lisa Marangon, 15&times;&nbsp;Ironman&nbsp;finisher</dd></div>
+        <div><dt>Coach</dt><dd>Lisa Marangon, former pro&nbsp;triathlete</dd></div>
       </dl>
     </div>
     <div class="band"><img src="assets/img/pool-lanes.jpg" alt="Aerial view of a swimmer doing freestyle between lane ropes in an outdoor pool" width="1500" height="1000" fetchpriority="high"></div>
@@ -264,7 +269,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="rail">
         <h2>Squads</h2>
-        <p>Three squads, all year round. Every ability is welcome, from beginners to advanced. The goal is the same for everyone: to make you a better&nbsp;swimmer.</p>
+        <p>Midday and evening squads all year round, plus an unlimited pass. Every ability is welcome, from beginners to advanced, and the goal is the same for everyone: to make you a better&nbsp;swimmer.</p>
       </div>
       <div class="body">
         <div class="lanes">
@@ -284,13 +289,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <div class="rope" aria-hidden="true"></div>
           <div class="lane">
             <div class="name"><h3>Unlimited</h3><span class="dur">Any squad, any day</span></div>
-            <div class="cell"><span class="label">Days</span><b>Any day</b></div>
-            <div class="cell"><span class="label">Time</span><b>Any time</b></div>
+            <div class="cell"><span class="label">Days</span><b>Any squad day</b></div>
+            <div class="cell"><span class="label">Time</span><b>Any squad time</b></div>
             <div class="cell"><span class="price"><sup>$</sup>150</span><small>per month</small><small>Lunchtime only: $130</small></div>
           </div>
         </div>
         <div class="squad-foot">
-          <p>New to squad? Drop in for a casual session first: $25 at lunchtime, $30 in the&nbsp;evening.</p>
+          <p>New to squads? Drop in for a casual session first and see how it&nbsp;feels.</p>
           <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
         </div>
         <div class="pool">
@@ -311,7 +316,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <figure><img src="assets/img/swimmer.jpg" alt="A swimmer gliding underwater after a push-off, seen from below the surface" width="1500" height="1000" loading="lazy"></figure>
         <div class="lesson-copy">
           <p>Private lessons run all year for every age and level: complete beginners, swimmers who want to improve their technique or learn a new stroke, and advanced swimmers looking for specific&nbsp;tips.</p>
-          <p>I focus on form and body movement, so you swim injury-free and feel comfortable in the water, whatever the&nbsp;stroke.</p>
+          <p>Lisa focuses on form and body movement, so you swim injury-free and feel comfortable in the water, whatever the&nbsp;stroke.</p>
           <ul class="rates">
             <li><span>Single lesson, 30 minutes</span><b class="price"><sup>$</sup>65</b></li>
             <li><span>Pack of four lessons</span><b class="price"><sup>$</sup>235</b></li>
@@ -327,30 +332,30 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="rail">
         <h2>Lisa Marangon</h2>
-        <p>Swim teacher since 17. Former professional triathlete. Still gets goosebumps watching someone&nbsp;improve.</p>
+        <p>Swim teacher since she was 17, and a former professional&nbsp;triathlete.</p>
       </div>
       <div class="body">
-        <figure><img src="assets/img/lisa.jpg" alt="Lisa Marangon smiling on the pool deck at Prince Alfred Park Pool" width="773" height="1030" loading="lazy"></figure>
+        <figure><img src="assets/img/lisa.jpg" alt="Lisa Marangon smiling on a pool deck in a cap and swimsuit" width="773" height="1030" loading="lazy"></figure>
         <div class="bio">
-          <p>I learned to swim properly at 13 and got fast very quickly. I was always an active kid and good at every sport I tried. In my HSC year my local squad coach asked if I'd like to teach swimming, and at 17 my career began. I started with children, then moved on to coaching adults as my experience grew, always practising what I&nbsp;preach.</p>
-          <p>I'm passionate about getting the best out of every swimmer, child or adult, at any level. My happiness comes from sharing what I know and helping people find the best in themselves. I raced triathlon at a high level for many years. Now I focus on helping others reach their swimming&nbsp;goals.</p>
+          <p>I learned to swim properly at 13 and got fast very quickly. I was always an active kid and good at every sport I tried. In my HSC year my local squad coach asked if I'd like to teach swimming, and at 17 my career began. I started with children, then moved on to coaching adults as my experience grew. I practise what I&nbsp;preach.</p>
+          <p>I'm passionate about getting the best out of every swimmer, child or adult, at any level. To this day I still get goosebumps: nothing makes me happier than sharing what I know and helping people find the best in themselves. I raced triathlon at a high level for several years. Now I focus on helping others reach their swimming&nbsp;goals.</p>
           <div class="stats">
             <div class="stat"><b>15</b><span>Ironman races finished</span></div>
             <div class="stat"><b>9:19</b><span>Fastest Ironman, WA&nbsp;2013</span></div>
           </div>
-          <ol class="career" aria-label="Triathlon career highlights">
-            <li><time>2002</time><span>1st, Forster 70.3 (18–24)</span></li>
+        </div>
+        <ol class="career" aria-label="Triathlon career highlights">
+            <li><time>2002</time><span>First 70.3: 2nd, Forster (18–24)</span></li>
             <li><time>2003</time><span>2nd, Ironman World Championships (18–24)</span></li>
             <li><time>2004</time><span>3rd, Ironman World Championships (18–24)</span></li>
             <li><time>2005</time><span>Turned professional · 3rd, Ironman Korea</span></li>
             <li><time>2010</time><span>26th overall, first pro Ironman World Championships</span></li>
-            <li><time>2011–12</time><span>Raced Olympic distance as a professional</span></li>
+            <li><time>2011–12</time><span>Trialled Olympic distance as a professional</span></li>
             <li><time>2012</time><span>16th, 70.3 World Championships</span></li>
-            <li><time>2013</time><span>3rd, Ironman Western Australia, in 9:19</span></li>
+            <li><time>2013</time><span>3rd, Ironman Western Australia (fastest time)</span></li>
             <li><time>2014</time><span>2nd, Ironman Australia</span></li>
           </ol>
-          <p class="note">Plus several 70.3 wins in Australia and podiums in long-distance&nbsp;triathlon.</p>
-        </div>
+          <p class="note more">Plus several 70.3 wins in Australia and podiums in long-distance&nbsp;triathlon.</p>
       </div>
     </div>
   </section>
