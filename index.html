@@ -1,11 +1,436 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-AU">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Magic Masters Swimming</title>
-<meta http-equiv="refresh" content="0; url=original/">
-<link rel="canonical" href="original/">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Masters swimming squads and private lessons with coach Lisa Marangon at Prince Alfred Park Pool, Surry Hills, Sydney. All levels, all year round.">
+<meta property="og:title" content="Magic Masters Swimming">
+<meta property="og:description" content="Masters squads and private lessons with Lisa Marangon at Prince Alfred Park Pool, Sydney.">
+<meta property="og:image" content="assets/img/pool-lanes.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23032f66'/%3E%3Crect x='5' y='15' width='22' height='3' fill='%2320b9b3'/%3E%3Crect x='14' y='15' width='5' height='3' fill='%23ce3457'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
+<style>
+/* Layout: editorial 12-col grid, headings in a left rail, content right; one full-bleed pool band.
+   Signature: the squad timetable as pool lanes, split by lane ropes sampled from the drone photo. */
+:root {
+  --canvas: #f3f8f8;      /* pool-tinted off-white */
+  --surface: #fbfdfd;
+  --ink: #0b2340;         /* deep lane-line navy */
+  --ink-2: #4b6275;
+  --line: rgba(11, 35, 64, 0.13);
+  --aqua: #20b9b3;        /* logo aqua: fills only */
+  --aqua-ink: #0c7a75;    /* aqua dark enough for text */
+  --on-aqua: #04211f;
+  --rope-blue: #044ca1;
+  --rope-red: #ce3457;
+
+  --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --wide: "wdth" 125;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.25rem;
+  --step-2: 1.625rem;
+  --step-3: clamp(1.85rem, 3.4vw, 2.75rem);
+  --step-4: clamp(2.6rem, 7.2vw, 5.75rem);
+
+  --gutter: 20px;
+  --max: 1200px;
+  --radius: 6px;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #071a2b; --surface: #0c2438; --ink: #e8f2f4; --ink-2: #9db4c2;
+    --line: rgba(232, 242, 244, 0.14); --aqua: #2fcfc7; --aqua-ink: #5ddbd4; --on-aqua: #04211f;
+    --rope-blue: #3b84e6; --rope-red: #ec5577; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas: #071a2b; --surface: #0c2438; --ink: #e8f2f4; --ink-2: #9db4c2;
+  --line: rgba(232, 242, 244, 0.14); --aqua: #2fcfc7; --aqua-ink: #5ddbd4; --on-aqua: #04211f;
+  --rope-blue: #3b84e6; --rope-red: #ec5577; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  font-variation-settings: "wdth" 100;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--canvas);
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--aqua); outline-offset: 3px; border-radius: 2px; }
+
+.wrap {
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { margin: 0; font-variation-settings: var(--wide); font-weight: 760; line-height: 1.04; letter-spacing: -0.01em; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+
+/* Wordmark rebuilt in type so it works on light and dark */
+.mark { font-variation-settings: "wdth" 100; font-weight: 600; font-size: 1.5rem; letter-spacing: -0.02em; text-decoration: none; line-height: 1; }
+.mark span { color: var(--aqua-ink); }
+
+/* Header */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--canvas);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 14px; }
+.top nav { display: flex; align-items: center; gap: 28px; font-size: var(--step--1); font-weight: 520; }
+.top nav a:not(.btn) { text-decoration: none; color: var(--ink-2); }
+.top nav a:not(.btn):hover { color: var(--ink); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 46px;
+  padding-inline: 22px; border-radius: var(--radius); font: inherit; font-size: var(--step--1);
+  font-weight: 650; text-decoration: none; cursor: pointer; border: 1.5px solid transparent;
+  transition: background-color 160ms cubic-bezier(0.2, 0, 0, 1), border-color 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+.btn-primary { background: var(--aqua); color: var(--on-aqua); }
+.btn-primary:hover { background: color-mix(in srgb, var(--aqua) 82%, var(--ink)); }
+.btn-ghost { border-color: var(--ink); color: var(--ink); background: transparent; }
+.btn-ghost:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.top .btn { min-height: 40px; padding-inline: 18px; }
+
+/* Hero */
+.hero .wrap { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(48px, 9vw, 112px) clamp(36px, 5vw, 56px); align-items: end; }
+.hero-copy { grid-column: 1 / span 8; display: grid; gap: 28px; }
+.hero h1 { font-size: var(--step-4); font-weight: 800; }
+.lede { font-size: var(--step-1); color: var(--ink-2); max-width: 36ch; line-height: 1.45; }
+.ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { grid-column: 10 / span 3; display: grid; gap: 18px; margin: 0; font-size: var(--step--1); }
+.facts div { display: grid; gap: 2px; padding-top: 12px; border-top: 1px solid var(--line); }
+.facts dt { color: var(--ink-2); }
+.facts dd { margin: 0; font-weight: 600; }
+.band { height: clamp(200px, 36vw, 500px); overflow: hidden; }
+.band img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-copy > * { animation: rise 520ms var(--ease-out) both; }
+  .hero-copy > *:nth-child(2) { animation-delay: 80ms; }
+  .hero-copy > *:nth-child(3) { animation-delay: 160ms; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+}
+
+/* Sections: heading rail left, content right */
+.section .wrap { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(64px, 9vw, 120px); }
+.section + .section .wrap { border-top: 1px solid var(--line); }
+.rail { grid-column: 1 / span 4; display: grid; gap: 16px; align-content: start; }
+.rail h2 { font-size: var(--step-3); }
+.rail p { color: var(--ink-2); max-width: 34ch; }
+.body { grid-column: 6 / span 7; display: grid; gap: 32px; min-width: 0; }
+
+/* Lane timetable */
+.lanes { display: grid; }
+.lane { display: grid; grid-template-columns: 1.1fr 1fr 1.2fr 1.1fr; gap: 20px; padding-block: 26px; align-items: start; }
+.lane h3 { font-size: var(--step-2); }
+.lane .dur { display: block; margin-top: 6px; font-size: var(--step--1); color: var(--ink-2); font-variation-settings: "wdth" 100; font-weight: 450; }
+.cell { display: grid; gap: 2px; font-size: var(--step--1); }
+.cell b { font-weight: 600; font-size: var(--step-0); }
+.cell small { color: var(--ink-2); font-size: var(--step--1); }
+.label { color: var(--ink-2); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+.price { font-variation-settings: var(--wide); font-weight: 760; font-size: var(--step-2); line-height: 1; font-variant-numeric: tabular-nums; }
+.price sup { font-size: 0.55em; vertical-align: 0.6em; margin-right: 1px; }
+.rope {
+  position: relative; height: 6px; border-radius: 3px;
+  background: repeating-linear-gradient(90deg, var(--rope-blue) 0 12px, transparent 12px 20px);
+}
+.rope::after { content: ""; position: absolute; left: 52%; width: 72px; height: 100%; border-radius: 3px; background: var(--rope-red); }
+.squad-foot { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: center; justify-content: space-between; }
+.squad-foot p { color: var(--ink-2); font-size: var(--step--1); max-width: 40ch; }
+.pool { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; }
+.pool img { border-radius: var(--radius); aspect-ratio: 495 / 400; object-fit: cover; }
+.pool p { font-size: var(--step--1); color: var(--ink-2); }
+.pool a { color: var(--aqua-ink); font-weight: 600; }
+
+/* Private lessons */
+.lessons .body { grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.lessons figure { margin: 0; }
+.lessons figure img { border-radius: var(--radius); aspect-ratio: 4 / 5; object-fit: cover; object-position: 30% 50%; width: 100%; }
+.lesson-copy { display: grid; gap: 20px; }
+.rates { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.rates li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.rates span { color: var(--ink-2); font-size: var(--step--1); }
+.note { font-size: var(--step--1); color: var(--ink-2); }
+
+/* About */
+.about .body { grid-template-columns: 5fr 7fr; gap: 32px; align-items: start; }
+.about figure { margin: 0; }
+.about figure img { border-radius: var(--radius); aspect-ratio: 773 / 1030; object-fit: cover; width: 100%; }
+.bio { display: grid; gap: 18px; }
+.stats { display: flex; flex-wrap: wrap; gap: 32px; padding-block: 8px; }
+.stat { display: grid; gap: 4px; }
+.stat b { font-variation-settings: var(--wide); font-weight: 800; font-size: var(--step-3); line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: var(--step--1); color: var(--ink-2); }
+.career { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line); font-size: var(--step--1); }
+.career li { display: grid; grid-template-columns: 78px 1fr; gap: 12px; padding-block: 11px; border-bottom: 1px solid var(--line); }
+.career time { font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* Contact */
+form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.field { display: grid; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+label { font-size: var(--step--1); font-weight: 600; }
+input, select, textarea {
+  font: inherit; font-size: var(--step-0); color: var(--ink); background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px 14px; width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px color-mix(in srgb, var(--aqua) 25%, transparent); }
+textarea { min-height: 140px; resize: vertical; }
+.form-end { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.status { font-size: var(--step--1); color: var(--ink-2); }
+
+/* Footer */
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: center; padding-block: 36px 48px; border-top: 1px solid var(--line); font-size: var(--step--1); color: var(--ink-2); }
+
+/* Tablet and phone */
+@media (max-width: 960px) {
+  .hero-copy { grid-column: 1 / -1; }
+  .facts { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
+  .rail, .body { grid-column: 1 / -1; }
+  .rail { margin-bottom: 8px; }
+}
+@media (max-width: 720px) {
+  .top nav a:not(.btn) { display: none; }
+  .facts { grid-template-columns: 1fr; gap: 12px; }
+  .lane { grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+  .lane .name { grid-column: 1 / -1; }
+  .lessons .body, .about .body { grid-template-columns: 1fr; }
+  .lessons figure img { aspect-ratio: 3 / 2; }
+  .about figure { max-width: 360px; }
+  .pool { grid-template-columns: 120px 1fr; }
+  form { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
 </head>
-<body><a href="original/">Magic Masters Swimming</a></body>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Magic Masters Swimming, home">magic<span>masters</span></a>
+    <nav aria-label="Main">
+      <a href="#squads">Squads</a>
+      <a href="#lessons">Private lessons</a>
+      <a href="#about">About Lisa</a>
+      <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>Swim better, at any&nbsp;level.</h1>
+        <p class="lede">Masters squads and private lessons in Sydney with Lisa Marangon, former professional triathlete. Beginners to advanced, all year&nbsp;round.</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="#squads">See squad times</a>
+          <a class="btn btn-ghost" href="#contact" data-topic="Private lessons">Book a private lesson</a>
+        </div>
+      </div>
+      <dl class="facts">
+        <div><dt>Pool</dt><dd>Prince Alfred Park Pool, Surry&nbsp;Hills</dd></div>
+        <div><dt>Squads</dt><dd>Monday to Friday, year&#8209;round</dd></div>
+        <div><dt>Coach</dt><dd>Lisa Marangon, 15&times;&nbsp;Ironman&nbsp;finisher</dd></div>
+      </dl>
+    </div>
+    <div class="band"><img src="assets/img/pool-lanes.jpg" alt="Aerial view of a swimmer doing freestyle between lane ropes in an outdoor pool" width="1500" height="1000" fetchpriority="high"></div>
+  </section>
+
+  <section class="section" id="squads">
+    <div class="wrap">
+      <div class="rail">
+        <h2>Squads</h2>
+        <p>Three squads, all year round. Every ability is welcome, from beginners to advanced. The goal is the same for everyone: to make you a better&nbsp;swimmer.</p>
+      </div>
+      <div class="body">
+        <div class="lanes">
+          <div class="lane">
+            <div class="name"><h3>Midday</h3><span class="dur">45-minute squad</span></div>
+            <div class="cell"><span class="label">Days</span><b>Mon, Wed, Fri</b></div>
+            <div class="cell"><span class="label">Time</span><b>12:15–1:00&nbsp;pm</b></div>
+            <div class="cell"><span class="price"><sup>$</sup>140</span><small>8-session pass</small><small>$25 casual</small></div>
+          </div>
+          <div class="rope" aria-hidden="true"></div>
+          <div class="lane">
+            <div class="name"><h3>Evening</h3><span class="dur">60-minute squad</span></div>
+            <div class="cell"><span class="label">Days</span><b>Mon, Tue, Thu</b></div>
+            <div class="cell"><span class="label">Time</span><b>5–6&nbsp;pm</b><small>Tue &amp; Thu also 6–7&nbsp;pm</small></div>
+            <div class="cell"><span class="price"><sup>$</sup>165</span><small>8-session pass</small><small>$30 casual</small></div>
+          </div>
+          <div class="rope" aria-hidden="true"></div>
+          <div class="lane">
+            <div class="name"><h3>Unlimited</h3><span class="dur">Any squad, any day</span></div>
+            <div class="cell"><span class="label">Days</span><b>Any day</b></div>
+            <div class="cell"><span class="label">Time</span><b>Any time</b></div>
+            <div class="cell"><span class="price"><sup>$</sup>150</span><small>per month</small><small>Lunchtime only: $130</small></div>
+          </div>
+        </div>
+        <div class="squad-foot">
+          <p>New to squad? Drop in for a casual session first: $25 at lunchtime, $30 in the&nbsp;evening.</p>
+          <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
+        </div>
+        <div class="pool">
+          <img src="assets/img/prince-alfred-pool.jpg" alt="The 50-metre outdoor pool at Prince Alfred Park, with yellow shade umbrellas" width="495" height="400" loading="lazy">
+          <p>All squads swim at Prince Alfred Park Pool, Chalmers Street, Surry Hills: a heated 50-metre outdoor pool, a short walk from Central&nbsp;Station.<br><a href="https://www.google.com/maps/search/?api=1&amp;query=Prince+Alfred+Park+Pool+Surry+Hills" target="_blank" rel="noopener">Get directions</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section lessons" id="lessons">
+    <div class="wrap">
+      <div class="rail">
+        <h2>Private lessons</h2>
+        <p>One-to-one coaching, built around exactly what you&nbsp;need.</p>
+      </div>
+      <div class="body">
+        <figure><img src="assets/img/swimmer.jpg" alt="A swimmer gliding underwater after a push-off, seen from below the surface" width="1500" height="1000" loading="lazy"></figure>
+        <div class="lesson-copy">
+          <p>Private lessons run all year for every age and level: complete beginners, swimmers who want to improve their technique or learn a new stroke, and advanced swimmers looking for specific&nbsp;tips.</p>
+          <p>I focus on form and body movement, so you swim injury-free and feel comfortable in the water, whatever the&nbsp;stroke.</p>
+          <ul class="rates">
+            <li><span>Single lesson, 30 minutes</span><b class="price"><sup>$</sup>65</b></li>
+            <li><span>Pack of four lessons</span><b class="price"><sup>$</sup>235</b></li>
+          </ul>
+          <p class="note">Lessons are subject to availability, so get in touch to secure your&nbsp;spot.</p>
+          <div><a class="btn btn-primary" href="#contact" data-topic="Private lessons">Book a private lesson</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section about" id="about">
+    <div class="wrap">
+      <div class="rail">
+        <h2>Lisa Marangon</h2>
+        <p>Swim teacher since 17. Former professional triathlete. Still gets goosebumps watching someone&nbsp;improve.</p>
+      </div>
+      <div class="body">
+        <figure><img src="assets/img/lisa.jpg" alt="Lisa Marangon smiling on the pool deck at Prince Alfred Park Pool" width="773" height="1030" loading="lazy"></figure>
+        <div class="bio">
+          <p>I learned to swim properly at 13 and got fast very quickly. I was always an active kid and good at every sport I tried. In my HSC year my local squad coach asked if I'd like to teach swimming, and at 17 my career began. I started with children, then moved on to coaching adults as my experience grew, always practising what I&nbsp;preach.</p>
+          <p>I'm passionate about getting the best out of every swimmer, child or adult, at any level. My happiness comes from sharing what I know and helping people find the best in themselves. I raced triathlon at a high level for many years. Now I focus on helping others reach their swimming&nbsp;goals.</p>
+          <div class="stats">
+            <div class="stat"><b>15</b><span>Ironman races finished</span></div>
+            <div class="stat"><b>9:19</b><span>Fastest Ironman, WA&nbsp;2013</span></div>
+          </div>
+          <ol class="career" aria-label="Triathlon career highlights">
+            <li><time>2002</time><span>1st, Forster 70.3 (18–24)</span></li>
+            <li><time>2003</time><span>2nd, Ironman World Championships (18–24)</span></li>
+            <li><time>2004</time><span>3rd, Ironman World Championships (18–24)</span></li>
+            <li><time>2005</time><span>Turned professional · 3rd, Ironman Korea</span></li>
+            <li><time>2010</time><span>26th overall, first pro Ironman World Championships</span></li>
+            <li><time>2011–12</time><span>Raced Olympic distance as a professional</span></li>
+            <li><time>2012</time><span>16th, 70.3 World Championships</span></li>
+            <li><time>2013</time><span>3rd, Ironman Western Australia, in 9:19</span></li>
+            <li><time>2014</time><span>2nd, Ironman Australia</span></li>
+          </ol>
+          <p class="note">Plus several 70.3 wins in Australia and podiums in long-distance&nbsp;triathlon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="rail">
+        <h2>Get in&nbsp;touch</h2>
+        <p>Ask about a squad, book a lesson, or just ask a question. Lisa will reply by&nbsp;email.</p>
+      </div>
+      <div class="body">
+        <form id="contact-form" novalidate>
+          <div class="field"><label for="cf-name">Your name</label><input id="cf-name" name="name" autocomplete="name" required></div>
+          <div class="field"><label for="cf-email">Your email</label><input id="cf-email" name="email" type="email" autocomplete="email" required></div>
+          <div class="field full"><label for="cf-topic">I'm interested in</label>
+            <select id="cf-topic" name="topic">
+              <option>Squads</option>
+              <option>Private lessons</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="field full"><label for="cf-message">Message</label><textarea id="cf-message" name="message" placeholder="Your swimming level, goals, and which days suit you"></textarea></div>
+          <div class="form-end">
+            <button class="btn btn-primary" type="submit">Send message</button>
+            <p class="status" id="cf-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="mark" href="#top">magic<span>masters</span></a>
+    <span>Prince Alfred Park Pool, Surry Hills NSW · © 2026 Magic Masters Swimming</span>
+  </div>
+</footer>
+
+<script>
+// No widows: bind the last two words of every text block so no line ends on a lone word.
+document.querySelectorAll("h1, h2, h3, p, dd, li span, .cell b, .cell small, .stat span, .dur").forEach(function (el) {
+  var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), last = null, n;
+  while ((n = walker.nextNode())) if (n.data.trim()) last = n;
+  if (last) last.data = last.data.replace(/ (\S+\s*)$/, " $1");
+});
+</script>
+<script>
+// Contact: no server, so a filled form opens the visitor's email app addressed to Lisa.
+// Set CONTACT_EMAIL to switch it on.
+(function () {
+  var CONTACT_EMAIL = "";
+  var form = document.getElementById("contact-form");
+  var status = document.getElementById("cf-status");
+  var topic = document.getElementById("cf-topic");
+
+  document.querySelectorAll("[data-topic]").forEach(function (link) {
+    link.addEventListener("click", function () { topic.value = link.getAttribute("data-topic"); });
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = form.name.value.trim();
+    var email = form.email.value.trim();
+    if (!name || !/^\S+@\S+\.\S+$/.test(email)) {
+      status.textContent = "Add your name and a valid email so Lisa can reply.";
+      (name ? form.email : form.name).focus();
+      return;
+    }
+    if (!CONTACT_EMAIL) {
+      status.textContent = "Online enquiries open soon. Your message hasn't been sent.";
+      return;
+    }
+    var body = form.message.value.trim() + "\n\n" + name + " (" + email + ")";
+    window.location.href = "mailto:" + CONTACT_EMAIL +
+      "?subject=" + encodeURIComponent(topic.value + " enquiry from " + name) +
+      "&body=" + encodeURIComponent(body);
+    status.textContent = "Your email app should open with the message ready to send.";
+  });
+})();
+</script>
+</body>
 </html>
