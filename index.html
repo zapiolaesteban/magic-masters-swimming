@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Magic Masters Swimming</title>
+<script>try{var t=localStorage.getItem("mms-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Masters swimming squads and private lessons with coach Lisa Marangon at Prince Alfred Park Pool, Surry Hills, Sydney. All levels, all year round.">
 <meta property="og:title" content="Magic Masters Swimming">
@@ -41,6 +42,12 @@
   --max: 1200px;
   --radius: 6px;
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --photo-ink: #f4f9fa;    /* text on the hero photo, both themes */
+  --photo-ink-2: rgba(244, 249, 250, 0.86);
+  --photo-line: rgba(244, 249, 250, 0.3);
+  --photo-shade: #05182a;
+  --photo-base: #0b4a5a;
+  --caustic: rgba(255, 255, 255, 0.55);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -112,25 +119,64 @@ p { margin: 0; text-wrap: pretty; }
 .btn-ghost { border-color: var(--ink); color: var(--ink); background: transparent; }
 .btn-ghost:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
 .top .btn { min-height: 44px; padding-inline: 18px; }
+.theme-toggle { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; cursor: pointer;
+  background: transparent; color: var(--ink); border: 1.5px solid var(--field); border-radius: var(--radius);
+  transition: background-color 160ms cubic-bezier(0.2, 0, 0, 1); }
+.theme-toggle:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.theme-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle .i-sun { display: none; }
+.theme-toggle[data-mode="dark"] .i-sun { display: block; }
+.theme-toggle[data-mode="dark"] .i-moon { display: none; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 
 /* Hero */
-.hero .wrap { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(48px, 9vw, 112px) clamp(36px, 5vw, 56px); align-items: end; }
+.hero { position: relative; isolation: isolate; overflow: hidden; display: grid; align-items: end;
+  min-height: clamp(560px, 86vh, 820px); color: var(--photo-ink); background: var(--photo-base); }
+.hero-bg { position: absolute; inset: 0; z-index: -1; }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 62%; transform: scale(1.1); }
+/* caustics: soft underwater light drifting over the water */
+.hero-bg::before { content: ""; position: absolute; inset: -25%; z-index: 1; pointer-events: none; opacity: 0.5; mix-blend-mode: soft-light;
+  background:
+    radial-gradient(28% 18% at 22% 30%, var(--caustic), transparent 70%),
+    radial-gradient(22% 16% at 64% 22%, var(--caustic), transparent 70%),
+    radial-gradient(30% 20% at 46% 70%, var(--caustic), transparent 70%),
+    radial-gradient(18% 14% at 82% 58%, var(--caustic), transparent 70%); }
+.hero-bg::after { content: ""; position: absolute; inset: 0; z-index: 2;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--photo-shade) 74%, transparent) 0%, color-mix(in srgb, var(--photo-shade) 40%, transparent) 55%, color-mix(in srgb, var(--photo-shade) 42%, transparent) 100%),
+    linear-gradient(0deg, color-mix(in srgb, var(--photo-shade) 78%, transparent) 0%, color-mix(in srgb, var(--photo-shade) 40%, transparent) 32%, transparent 58%); }
+.hero .wrap { width: 100%; display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(96px, 14vw, 168px) clamp(40px, 6vw, 72px); align-items: end; }
 .hero-copy { grid-column: 1 / span 8; display: grid; gap: 28px; }
 .hero h1 { font-size: var(--step-4); font-weight: 800; }
-.lede { font-size: var(--step-1); color: var(--ink-2); max-width: 36ch; line-height: 1.45; }
+.lede { font-size: var(--step-1); color: var(--photo-ink-2); max-width: 36ch; line-height: 1.45; }
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
 .facts { grid-column: 10 / span 3; display: grid; gap: 18px; margin: 0; font-size: var(--step--1); }
-.facts div { display: grid; gap: 2px; padding-top: 12px; border-top: 1px solid var(--line); }
-.facts dt { color: var(--ink-2); }
+.facts div { display: grid; gap: 2px; padding-top: 12px; border-top: 1px solid var(--photo-line); }
+.facts dt { color: var(--photo-ink-2); }
+.hero .btn-ghost { border-color: var(--photo-ink); color: var(--photo-ink); }
+.hero .btn-ghost:hover { background: color-mix(in srgb, var(--photo-ink) 14%, transparent); }
 .facts dd { margin: 0; font-weight: 600; }
-.band { height: clamp(200px, 36vw, 500px); overflow: hidden; }
-.band img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
 
 @media (prefers-reduced-motion: no-preference) {
   .hero-copy > * { animation: rise 520ms var(--ease-out) both; }
   .hero-copy > *:nth-child(2) { animation-delay: 80ms; }
   .hero-copy > *:nth-child(3) { animation-delay: 160ms; }
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .hero-bg::before { animation: caustics 20s ease-in-out infinite alternate; }
+  @keyframes caustics {
+    from { transform: translate3d(-3%, -2%, 0) rotate(-2deg) scale(1); }
+    to   { transform: translate3d(4%, 3%, 0) rotate(4deg) scale(1.1); }
+  }
+  @supports (animation-timeline: scroll()) {
+    .hero-bg img { animation: parallax linear both; animation-timeline: scroll(root block); animation-range: 0px 900px; }
+    @keyframes parallax { from { transform: translateY(0) scale(1.1); } to { transform: translateY(16%) scale(1.1); } }
+  }
+  @supports (animation-timeline: view()) {
+    .rail > *, .body > *, .lanes > .lane { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
+    @keyframes reveal { from { opacity: 0.15; transform: translateY(28px); } }
+    .rope { transform-origin: left center; animation: rope-draw linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
+    @keyframes rope-draw { from { transform: scaleX(0); } }
+  }
 }
 
 /* Sections: heading rail left, content right */
@@ -167,7 +213,8 @@ p { margin: 0; text-wrap: pretty; }
 /* Private lessons */
 .lessons .body { grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
 .lessons figure { margin: 0; }
-.lessons figure img { border-radius: var(--radius); aspect-ratio: 4 / 5; object-fit: cover; object-position: 30% 50%; width: 100%; }
+.lessons figure { overflow: hidden; border-radius: var(--radius); }
+.lessons figure img { aspect-ratio: 4 / 5; object-fit: cover; object-position: 37% 24%; width: 100%; }
 .lesson-copy { display: grid; gap: 20px; }
 .rates { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .rates li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--line); }
@@ -214,7 +261,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 }
 @media (max-width: 720px) {
   html { scroll-padding-top: 140px; }
-  .top .wrap { flex-wrap: wrap; }
+  .top .wrap { flex-wrap: wrap; column-gap: 10px; }
+  .top .btn { padding-inline: 14px; }
   .top nav { order: 3; width: 100%; gap: 22px; border-top: 1px solid var(--line); }
   .facts { grid-template-columns: 1fr; gap: 12px; }
   .lane { grid-template-columns: 1fr 1fr; gap: 16px 20px; }
@@ -226,7 +274,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   form { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
   html { scroll-behavior: auto; }
 }
 </style>
@@ -241,12 +289,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#lessons">Private lessons</a>
       <a href="#about">About Lisa</a>
     </nav>
+    <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Switch to dark mode">
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
     <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
   </div>
 </header>
 
 <main id="top">
   <section class="hero">
+    <div class="hero-bg" aria-hidden="true"><img src="assets/img/hero-swimmer.jpg" alt="" width="1732" height="1155" fetchpriority="high"></div>
     <div class="wrap">
       <div class="hero-copy">
         <h1>Swim better, at any&nbsp;level.</h1>
@@ -262,7 +315,6 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <div><dt>Coach</dt><dd>Lisa Marangon, former pro&nbsp;triathlete</dd></div>
       </dl>
     </div>
-    <div class="band"><img src="assets/img/pool-lanes.jpg" alt="Aerial view of a swimmer doing freestyle between lane ropes in an outdoor pool" width="1500" height="1000" fetchpriority="high"></div>
   </section>
 
   <section class="section" id="squads">
@@ -313,7 +365,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <p>One-to-one coaching, built around exactly what you&nbsp;need.</p>
       </div>
       <div class="body">
-        <figure><img src="assets/img/swimmer.jpg" alt="A swimmer gliding underwater after a push-off, seen from below the surface" width="1500" height="1000" loading="lazy"></figure>
+        <figure><img src="assets/img/pool-lanes.jpg" alt="Aerial view of a swimmer doing freestyle between lane ropes in an outdoor pool" width="1500" height="1000" loading="lazy"></figure>
         <div class="lesson-copy">
           <p>Private lessons run all year for every age and level: complete beginners, swimmers who want to improve their technique or learn a new stroke, and advanced swimmers looking for specific&nbsp;tips.</p>
           <p>Lisa focuses on form and body movement, so you swim injury-free and feel comfortable in the water, whatever the&nbsp;stroke.</p>
@@ -395,6 +447,41 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
 </footer>
 
+<script>
+// Light/dark toggle: follows the phone setting until the visitor picks one, then remembers it.
+(function () {
+  var root = document.documentElement, btn = document.getElementById("theme-toggle");
+  var mq = window.matchMedia("(prefers-color-scheme: dark)");
+  var still = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function current() { return root.getAttribute("data-theme") || (mq.matches ? "dark" : "light"); }
+  function paint() {
+    var mode = current();
+    btn.setAttribute("data-mode", mode);
+    btn.setAttribute("aria-label", mode === "dark" ? "Switch to light mode" : "Switch to dark mode");
+  }
+  function apply(mode) {
+    root.setAttribute("data-theme", mode);
+    try { localStorage.setItem("mms-theme", mode); } catch (e) {}
+    paint();
+  }
+  btn.addEventListener("click", function () {
+    var next = current() === "dark" ? "light" : "dark";
+    if (!document.startViewTransition || still.matches) { apply(next); return; }
+    var r = btn.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    var radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    var done = false;
+    var vt = document.startViewTransition(function () { done = true; apply(next); });
+    // Safety net: if the browser never paints the transition, switch anyway.
+    setTimeout(function () { if (!done) { vt.skipTransition(); apply(next); } }, 400);
+    vt.ready.then(function () {
+      root.animate({ clipPath: ["circle(0px at " + x + "px " + y + "px)", "circle(" + radius + "px at " + x + "px " + y + "px)"] },
+        { duration: 560, easing: "cubic-bezier(0.2, 0, 0, 1)", pseudoElement: "::view-transition-new(root)" });
+    }).catch(function () {});
+  });
+  if (mq.addEventListener) mq.addEventListener("change", paint);
+  paint();
+})();
+</script>
 <script>
 // No widows: bind the last two words of every text block so no line ends on a lone word.
 document.querySelectorAll("h1, h2, h3, p, dd, li span, .cell b, .cell small, .stat span, .dur").forEach(function (el) {
