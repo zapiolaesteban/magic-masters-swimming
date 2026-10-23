@@ -1,8 +1,8 @@
 // Replaces Contact Form 7 (which needed WordPress to send mail).
 // On submit, opens the visitor's own email app with the message pre-filled.
-// Set CONTACT_EMAIL to Lisa's address to switch it on.
+// The address is stored in two halves so simple spam scrapers can't read it from the source.
 (function () {
-  var CONTACT_EMAIL = "";
+  var CONTACT_EMAIL = ["lisamarangon97", "gmail.com"].join("@");
 
   var form = document.querySelector("form[data-static-contact]");
   if (!form) return;
@@ -31,5 +31,9 @@
       "mailto:" + CONTACT_EMAIL +
       "?subject=" + encodeURIComponent(subject) +
       "&body=" + encodeURIComponent(body);
+    if (out) {
+      out.textContent = "Your email app should open with the message ready to send. If nothing opens, email Lisa at " + CONTACT_EMAIL + ".";
+      out.style.display = "block";
+    }
   });
 })();

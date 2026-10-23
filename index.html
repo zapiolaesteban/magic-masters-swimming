@@ -492,9 +492,9 @@ document.querySelectorAll("h1, h2, h3, p, dd, li span, .cell b, .cell small, .st
 </script>
 <script>
 // Contact: no server, so a filled form opens the visitor's email app addressed to Lisa.
-// Set CONTACT_EMAIL to switch it on.
+// The address is stored in two halves so simple spam scrapers can't read it from the source.
 (function () {
-  var CONTACT_EMAIL = "";
+  var CONTACT_EMAIL = ["lisamarangon97", "gmail.com"].join("@");
   var form = document.getElementById("contact-form");
   var status = document.getElementById("cf-status");
   var topic = document.getElementById("cf-topic");
@@ -520,7 +520,7 @@ document.querySelectorAll("h1, h2, h3, p, dd, li span, .cell b, .cell small, .st
     window.location.href = "mailto:" + CONTACT_EMAIL +
       "?subject=" + encodeURIComponent(topic.value + " enquiry from " + name) +
       "&body=" + encodeURIComponent(body);
-    status.textContent = "Your email app should open with the message ready to send.";
+    status.textContent = "Your email app should open with the message ready to send. If nothing opens, email Lisa at " + CONTACT_EMAIL + ".";
   });
 })();
 </script>
