@@ -132,6 +132,7 @@ p { margin: 0; text-wrap: pretty; }
 .theme-toggle[data-mode="dark"] .i-moon { display: none; }
 :root:not(.lb-vt)::view-transition-old(root), :root:not(.lb-vt)::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 ::view-transition-group(lb-photo) { animation-duration: 460ms; animation-timing-function: cubic-bezier(0.2, 0, 0, 1); }
+::view-transition-old(lb-photo), ::view-transition-new(lb-photo) { width: 100%; height: 100%; object-fit: cover; overflow: clip; }
 
 /* Hero */
 .hero { position: relative; isolation: isolate; overflow: hidden; display: grid; align-items: end;
@@ -139,12 +140,11 @@ p { margin: 0; text-wrap: pretty; }
 .hero-bg { position: absolute; inset: 0; z-index: -1; }
 .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 62%; scale: 1.12; }
 /* caustics: soft underwater light drifting over the water */
-.hero-bg::before { content: ""; position: absolute; inset: -25%; z-index: 1; pointer-events: none; opacity: 0.18;
+.hero-bg::before { content: ""; position: absolute; inset: -8% -8% 30% -8%; z-index: 1; pointer-events: none; opacity: 0.24;
   background:
-    radial-gradient(28% 18% at 22% 30%, var(--caustic), transparent 70%),
-    radial-gradient(22% 16% at 64% 22%, var(--caustic), transparent 70%),
-    radial-gradient(30% 20% at 46% 70%, var(--caustic), transparent 70%),
-    radial-gradient(18% 14% at 82% 58%, var(--caustic), transparent 70%); }
+    radial-gradient(26% 12% at 24% 34%, var(--caustic), transparent 60%),
+    radial-gradient(20% 10% at 66% 22%, var(--caustic), transparent 60%),
+    radial-gradient(24% 11% at 48% 64%, var(--caustic), transparent 60%); }
 .hero-bg::after { content: ""; position: absolute; inset: 0; z-index: 2;
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--photo-shade) 74%, transparent) 0%, color-mix(in srgb, var(--photo-shade) 40%, transparent) 55%, color-mix(in srgb, var(--photo-shade) 42%, transparent) 100%),
@@ -174,14 +174,12 @@ p { margin: 0; text-wrap: pretty; }
   @keyframes line-up { from { translate: 0 105%; } }
   @keyframes rise { from { opacity: 0; translate: 0 14px; } }
 
-  /* Hero: caustic light drifts; the photo breathes (Ken Burns on `scale`) */
+  /* Hero: caustic light drifts slowly over the water */
   .hero-bg::before { animation: caustics 20s ease-in-out infinite alternate; }
   @keyframes caustics {
     from { transform: translate3d(-3%, -2%, 0) rotate(-2deg) scale(1); }
     to   { transform: translate3d(4%, 3%, 0) rotate(4deg) scale(1.1); }
   }
-  .hero-bg img { animation: breathe 26s ease-in-out infinite alternate; }
-  @keyframes breathe { from { scale: 1.12; } to { scale: 1.2; } }
 
   /* Desktop hover: photos lean in a touch */
   @media (hover: hover) and (pointer: fine) {
@@ -190,15 +188,12 @@ p { margin: 0; text-wrap: pretty; }
   }
 
   /* Lightbox entry when View Transitions aren't available */
-  .lightbox[open]:not(.vt) { animation: lb-in 320ms var(--ease-out); }
-  .lightbox[open]:not(.vt)::backdrop { animation: lb-fade 320ms var(--ease-out); }
-  @keyframes lb-in { from { opacity: 0; scale: 0.96; } }
+  .lightbox.fade[open], .lightbox.fade[open]::backdrop { animation: lb-fade 320ms var(--ease-out); }
   @keyframes lb-fade { from { opacity: 0; } }
 
   @supports (animation-timeline: scroll()) {
     /* Parallax on `translate`, layered over the breathing `scale` */
-    .hero-bg img { animation: breathe 26s ease-in-out infinite alternate, parallax linear both;
-      animation-timeline: auto, scroll(root block); animation-range: normal, 0px 900px; }
+    .hero-bg img { animation: parallax linear both; animation-timeline: scroll(root block); animation-range: 0px 900px; }
     @keyframes parallax { from { translate: 0 0; } to { translate: 0 16%; } }
     /* Header: a lane rope fills as you scroll down the page; a soft shadow lifts it */
     .top::after { animation: progress linear both; animation-timeline: scroll(root block); }
@@ -208,24 +203,18 @@ p { margin: 0; text-wrap: pretty; }
   }
 
   @supports (animation-timeline: view()) {
-    .body > *:not(figure):not(.lanes) { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
+    .body > *:not(figure):not(.lanes):not(.pool) { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
     /* The rail is sticky, and iOS Safari still has bugs with view() on sticky elements,
        so rail content follows its (non-sticky) section's timeline instead of its own. */
     .section { view-timeline: --section block; }
     .rail > * { animation: reveal linear both; animation-timeline: --section; animation-range: entry 5% entry 35%; }
     @keyframes reveal { from { opacity: 0.15; translate: 0 28px; } }
-    /* Squads: rows push off the wall; ropes draw across */
-    .lanes > .lane { animation: push-off linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
-    @keyframes push-off { from { opacity: 0.15; translate: -40px 0; } }
+    /* Squads: the lane ropes draw across */
     .rope { transform-origin: left center; animation: rope-draw linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
     @keyframes rope-draw { from { transform: scaleX(0); } }
-    /* Photos: a water line rises to reveal them while they settle from a slight zoom */
-    .zoom { animation: water-line linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
-    @keyframes water-line { from { clip-path: inset(24% 0 0 0 round var(--radius)); } to { clip-path: inset(0 0 0 0 round var(--radius)); } }
+    /* Photos settle from a slight zoom as they arrive */
     .zoom img { animation: settle linear both; animation-timeline: view(); animation-range: entry 0% cover 55%; }
     @keyframes settle { from { scale: 1.18; } to { scale: 1; } }
-    /* Section headings: a short rope underline draws in */
-    .rail h2::after { animation: rope-draw linear both; animation-timeline: --section; animation-range: entry 15% entry 50%; }
     /* Lisa's results: a line runs down the timeline as you read */
     .career { view-timeline: --career block; }
     .career::before { animation: timeline-grow linear both; animation-timeline: --career; animation-range: entry 40% cover 50%; }
@@ -238,8 +227,6 @@ p { margin: 0; text-wrap: pretty; }
 .section + .section .wrap { border-top: 1px solid var(--line); }
 .rail { grid-column: 1 / span 4; display: grid; gap: 16px; align-content: start; position: sticky; top: 96px; align-self: start; }
 .rail h2 { font-size: var(--step-3); }
-.rail h2::after { content: ""; display: block; width: 72px; height: 5px; margin-top: 18px; border-radius: 3px; transform-origin: left center;
-  background: linear-gradient(90deg, transparent 44px, var(--rope-red) 44px 60px, transparent 60px), repeating-linear-gradient(90deg, var(--rope-blue) 0 9px, transparent 9px 14px); }
 .rail p { color: var(--ink-2); max-width: 34ch; }
 .body { grid-column: 6 / span 7; display: grid; gap: 32px; min-width: 0; }
 
@@ -271,6 +258,8 @@ p { margin: 0; text-wrap: pretty; }
 .zoom .zoom-hint svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .lightbox { border: 0; padding: 0; background: transparent; color: var(--photo-ink); max-width: min(92vw, 1200px); max-height: 92vh; overflow: visible; }
 .lightbox::backdrop { background: color-mix(in srgb, var(--photo-shade) 90%, transparent); }
+html:has(.lightbox[open]) { overflow: hidden; }
+.lightbox { overscroll-behavior: contain; }
 .lightbox figure { margin: 0; display: grid; gap: 12px; justify-items: center; }
 .lightbox img { max-width: 100%; max-height: 80vh; width: auto; height: auto; border-radius: var(--radius); cursor: zoom-out; }
 .lightbox figcaption { font-size: var(--step--1); color: var(--photo-ink-2); text-align: center; max-width: 60ch; }
@@ -512,7 +501,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 </main>
 
 <dialog class="lightbox" id="lightbox" aria-label="Photo">
-  <figure><img id="lb-img" src="" alt=""><figcaption id="lb-cap"></figcaption></figure>
+  <figure><img id="lb-img" src="" alt=""><figcaption id="lb-cap" aria-hidden="true"></figcaption></figure>
   <button class="lb-close" type="button" aria-label="Close photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
 </dialog>
 
@@ -563,30 +552,37 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 // where View Transitions exist the photo also grows out of its spot on the page.
 (function () {
   var dlg = document.getElementById("lightbox"), big = document.getElementById("lb-img"), cap = document.getElementById("lb-cap");
-  var root = document.documentElement, still = window.matchMedia("(prefers-reduced-motion: reduce)"), thumb = null;
+  var root = document.documentElement, still = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var current = null, busy = false;
   function morph(update, after) {
-    if (!document.startViewTransition || still.matches) { update(); after(); return; }
-    root.classList.add("lb-vt"); dlg.classList.add("vt");
+    busy = true;
+    function finish() { busy = false; after(); }
+    if (!document.startViewTransition || still.matches) { dlg.classList.add("fade"); update(); finish(); return; }
+    dlg.classList.remove("fade");
+    root.classList.add("lb-vt");
     var done = false;
     var vt = document.startViewTransition(function () { done = true; update(); });
     // Safety net: if the browser never paints the transition, finish without it.
     setTimeout(function () { if (!done) { vt.skipTransition(); update(); } }, 400);
     vt.ready.catch(function () {});
-    vt.finished.catch(function () {}).then(function () { root.classList.remove("lb-vt"); dlg.classList.remove("vt"); after(); });
+    vt.finished.catch(function () {}).then(function () { root.classList.remove("lb-vt"); finish(); });
   }
   function open(btn) {
-    thumb = btn.querySelector("img");
-    big.src = thumb.currentSrc || thumb.src; big.alt = thumb.alt; cap.textContent = thumb.alt;
-    thumb.style.viewTransitionName = "lb-photo";
-    morph(function () { thumb.style.viewTransitionName = ""; big.style.viewTransitionName = "lb-photo"; if (!dlg.open) dlg.showModal(); },
+    if (busy || dlg.open) return;
+    var t = btn.querySelector("img");
+    current = t;
+    big.src = t.currentSrc || t.src; big.alt = t.alt; cap.textContent = t.alt;
+    dlg.setAttribute("aria-label", t.alt);
+    t.style.viewTransitionName = "lb-photo";
+    morph(function () { t.style.viewTransitionName = ""; big.style.viewTransitionName = "lb-photo"; if (!dlg.open) dlg.showModal(); },
           function () { big.style.viewTransitionName = ""; });
   }
   function close() {
-    if (!dlg.open) return;
-    var t = thumb;
+    if (busy || !dlg.open) return;
+    var t = current;
     big.style.viewTransitionName = "lb-photo";
-    morph(function () { big.style.viewTransitionName = ""; if (t) t.style.viewTransitionName = "lb-photo"; if (dlg.open) dlg.close(); },
-          function () { if (t) t.style.viewTransitionName = ""; });
+    morph(function () { big.style.viewTransitionName = ""; t.style.viewTransitionName = "lb-photo"; if (dlg.open) dlg.close(); },
+          function () { t.style.viewTransitionName = ""; });
   }
   document.querySelectorAll(".zoom").forEach(function (btn) { btn.addEventListener("click", function () { open(btn); }); });
   dlg.querySelector(".lb-close").addEventListener("click", close);
