@@ -103,6 +103,9 @@ p { margin: 0; text-wrap: pretty; }
 }
 .top .wrap { display: flex; align-items: center; gap: 12px 28px; padding-block: 12px; }
 .top .mark { margin-right: auto; }
+/* scroll-progress rope; hidden until the browser can drive it from the scroll position */
+.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; transform-origin: left center; scale: 0 1;
+  background: repeating-linear-gradient(90deg, var(--rope-blue) 0 10px, transparent 10px 16px); }
 .top nav { display: flex; align-items: center; gap: 28px; font-size: var(--step--1); font-weight: 520; }
 .top nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .top nav a:not(.btn) { text-decoration: none; color: var(--ink-2); }
@@ -127,13 +130,14 @@ p { margin: 0; text-wrap: pretty; }
 .theme-toggle .i-sun { display: none; }
 .theme-toggle[data-mode="dark"] .i-sun { display: block; }
 .theme-toggle[data-mode="dark"] .i-moon { display: none; }
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+:root:not(.lb-vt)::view-transition-old(root), :root:not(.lb-vt)::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-group(lb-photo) { animation-duration: 460ms; animation-timing-function: cubic-bezier(0.2, 0, 0, 1); }
 
 /* Hero */
 .hero { position: relative; isolation: isolate; overflow: hidden; display: grid; align-items: end;
   min-height: clamp(560px, 86vh, 820px); color: var(--photo-ink); background: var(--photo-base); }
 .hero-bg { position: absolute; inset: 0; z-index: -1; }
-.hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 62%; transform: scale(1.1); }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 62%; scale: 1.12; }
 /* caustics: soft underwater light drifting over the water */
 .hero-bg::before { content: ""; position: absolute; inset: -25%; z-index: 1; pointer-events: none; opacity: 0.5; mix-blend-mode: soft-light;
   background:
@@ -148,6 +152,8 @@ p { margin: 0; text-wrap: pretty; }
 .hero .wrap { width: 100%; display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; padding-block: clamp(96px, 14vw, 168px) clamp(40px, 6vw, 72px); align-items: end; }
 .hero-copy { grid-column: 1 / span 8; display: grid; gap: 28px; }
 .hero h1 { font-size: var(--step-4); font-weight: 800; }
+.hero h1 .line { display: block; overflow: hidden; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+.hero h1 .line > span { display: inline-block; }
 .lede { font-size: var(--step-1); color: var(--photo-ink-2); max-width: 36ch; line-height: 1.45; }
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
 .facts { grid-column: 10 / span 3; display: grid; gap: 18px; margin: 0; font-size: var(--step--1); }
@@ -157,25 +163,70 @@ p { margin: 0; text-wrap: pretty; }
 .hero .btn-ghost:hover { background: color-mix(in srgb, var(--photo-ink) 14%, transparent); }
 .facts dd { margin: 0; font-weight: 600; }
 
+/* ---------- Motion. Everything below is off under prefers-reduced-motion,
+   and every scroll-driven effect sits behind @supports so older browsers get a still page. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-copy > * { animation: rise 520ms var(--ease-out) both; }
-  .hero-copy > *:nth-child(2) { animation-delay: 80ms; }
-  .hero-copy > *:nth-child(3) { animation-delay: 160ms; }
-  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  /* Load: headline lines rise out of a mask, then the lede and buttons */
+  .hero h1 .line > span { animation: line-up 760ms cubic-bezier(0.2, 0.7, 0, 1) both; }
+  .hero h1 .line:nth-child(2) > span { animation-delay: 90ms; }
+  .hero-copy > *:not(h1) { animation: rise 560ms var(--ease-out) both; animation-delay: 260ms; }
+  .hero-copy > .ctas { animation-delay: 360ms; }
+  @keyframes line-up { from { translate: 0 105%; } }
+  @keyframes rise { from { opacity: 0; translate: 0 14px; } }
+
+  /* Hero: caustic light drifts; the photo breathes (Ken Burns on `scale`) */
   .hero-bg::before { animation: caustics 20s ease-in-out infinite alternate; }
   @keyframes caustics {
     from { transform: translate3d(-3%, -2%, 0) rotate(-2deg) scale(1); }
     to   { transform: translate3d(4%, 3%, 0) rotate(4deg) scale(1.1); }
   }
-  @supports (animation-timeline: scroll()) {
-    .hero-bg img { animation: parallax linear both; animation-timeline: scroll(root block); animation-range: 0px 900px; }
-    @keyframes parallax { from { transform: translateY(0) scale(1.1); } to { transform: translateY(16%) scale(1.1); } }
+  .hero-bg img { animation: breathe 26s ease-in-out infinite alternate; }
+  @keyframes breathe { from { scale: 1.12; } to { scale: 1.2; } }
+
+  /* Desktop hover: photos lean in a touch */
+  @media (hover: hover) and (pointer: fine) {
+    .zoom img { transition: transform 700ms var(--ease-out); }
+    .zoom:hover img, .zoom:focus-visible img { transform: scale(1.05); }
   }
+
+  /* Lightbox entry when View Transitions aren't available */
+  .lightbox[open]:not(.vt) { animation: lb-in 320ms var(--ease-out); }
+  .lightbox[open]:not(.vt)::backdrop { animation: lb-fade 320ms var(--ease-out); }
+  @keyframes lb-in { from { opacity: 0; scale: 0.96; } }
+  @keyframes lb-fade { from { opacity: 0; } }
+
+  @supports (animation-timeline: scroll()) {
+    /* Parallax on `translate`, layered over the breathing `scale` */
+    .hero-bg img { animation: breathe 26s ease-in-out infinite alternate, parallax linear both;
+      animation-timeline: auto, scroll(root block); animation-range: normal, 0px 900px; }
+    @keyframes parallax { from { translate: 0 0; } to { translate: 0 16%; } }
+    /* Header: a lane rope fills as you scroll down the page; a soft shadow lifts it */
+    .top::after { animation: progress linear both; animation-timeline: scroll(root block); }
+    @keyframes progress { from { scale: 0 1; } to { scale: 1 1; } }
+    .top { animation: lift linear both; animation-timeline: scroll(root block); animation-range: 0px 140px; }
+    @keyframes lift { to { box-shadow: 0 10px 28px -18px color-mix(in srgb, var(--ink) 55%, transparent); } }
+  }
+
   @supports (animation-timeline: view()) {
-    .rail > *, .body > *, .lanes > .lane { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
-    @keyframes reveal { from { opacity: 0.15; transform: translateY(28px); } }
+    .rail > *, .body > *:not(figure):not(.lanes) { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
+    @keyframes reveal { from { opacity: 0.15; translate: 0 28px; } }
+    /* Squads: rows push off the wall; ropes draw across */
+    .lanes > .lane { animation: push-off linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+    @keyframes push-off { from { opacity: 0.15; translate: -40px 0; } }
     .rope { transform-origin: left center; animation: rope-draw linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
     @keyframes rope-draw { from { transform: scaleX(0); } }
+    /* Photos: a water line rises to reveal them while they settle from a slight zoom */
+    .zoom { animation: water-line linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    @keyframes water-line { from { clip-path: inset(24% 0 0 0 round var(--radius)); } to { clip-path: inset(0 0 0 0 round var(--radius)); } }
+    .zoom img { animation: settle linear both; animation-timeline: view(); animation-range: entry 0% cover 55%; }
+    @keyframes settle { from { scale: 1.18; } to { scale: 1; } }
+    /* Section headings: a short rope underline draws in */
+    .rail h2 { view-timeline: --heading block; }
+    .rail h2::after { animation: rope-draw linear both; animation-timeline: --heading; animation-range: entry 40% cover 30%; }
+    /* Lisa's results: a line runs down the timeline as you read */
+    .career { view-timeline: --career block; }
+    .career::before { animation: timeline-grow linear both; animation-timeline: --career; animation-range: entry 40% cover 50%; }
+    @keyframes timeline-grow { from { scale: 1 0; } }
   }
 }
 
@@ -184,6 +235,8 @@ p { margin: 0; text-wrap: pretty; }
 .section + .section .wrap { border-top: 1px solid var(--line); }
 .rail { grid-column: 1 / span 4; display: grid; gap: 16px; align-content: start; position: sticky; top: 96px; align-self: start; }
 .rail h2 { font-size: var(--step-3); }
+.rail h2::after { content: ""; display: block; width: 72px; height: 5px; margin-top: 18px; border-radius: 3px; transform-origin: left center;
+  background: linear-gradient(90deg, transparent 44px, var(--rope-red) 44px 60px, transparent 60px), repeating-linear-gradient(90deg, var(--rope-blue) 0 9px, transparent 9px 14px); }
 .rail p { color: var(--ink-2); max-width: 34ch; }
 .body { grid-column: 6 / span 7; display: grid; gap: 32px; min-width: 0; }
 
@@ -206,14 +259,28 @@ p { margin: 0; text-wrap: pretty; }
 .squad-foot { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: center; justify-content: space-between; }
 .squad-foot p { color: var(--ink-2); font-size: var(--step--1); max-width: 40ch; }
 .pool { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; }
-.pool img { border-radius: var(--radius); aspect-ratio: 495 / 400; object-fit: cover; }
+.pool img { aspect-ratio: 495 / 400; object-fit: cover; }
+/* Tap-to-enlarge photos */
+.zoom { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: var(--radius); overflow: hidden; }
+.zoom img { width: 100%; }
+.zoom .zoom-hint { position: absolute; right: 10px; bottom: 10px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: color-mix(in srgb, var(--photo-shade) 62%, transparent); color: var(--photo-ink); }
+.zoom .zoom-hint svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.lightbox { border: 0; padding: 0; background: transparent; color: var(--photo-ink); max-width: min(92vw, 1200px); max-height: 92vh; overflow: visible; }
+.lightbox::backdrop { background: color-mix(in srgb, var(--photo-shade) 90%, transparent); }
+.lightbox figure { margin: 0; display: grid; gap: 12px; justify-items: center; }
+.lightbox img { max-width: 100%; max-height: 80vh; width: auto; height: auto; border-radius: var(--radius); cursor: zoom-out; }
+.lightbox figcaption { font-size: var(--step--1); color: var(--photo-ink-2); text-align: center; max-width: 60ch; }
+.lb-close { position: fixed; top: max(16px, env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); display: grid; place-items: center;
+  width: 44px; height: 44px; padding: 0; cursor: pointer; border-radius: var(--radius); border: 1.5px solid var(--photo-line);
+  background: color-mix(in srgb, var(--photo-shade) 60%, transparent); color: var(--photo-ink); }
+.lb-close svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .pool p { font-size: var(--step--1); color: var(--ink-2); }
 .pool a { color: var(--aqua-ink); font-weight: 600; display: inline-block; padding-block: 10px; }
 
 /* Private lessons */
 .lessons .body { grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
 .lessons figure { margin: 0; }
-.lessons figure { overflow: hidden; border-radius: var(--radius); }
 .lessons figure img { aspect-ratio: 4 / 5; object-fit: cover; object-position: 37% 24%; width: 100%; }
 .lesson-copy { display: grid; gap: 20px; }
 .rates { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
@@ -224,14 +291,15 @@ p { margin: 0; text-wrap: pretty; }
 /* About */
 .about .body { grid-template-columns: 5fr 7fr; gap: 32px; align-items: start; }
 .about figure { margin: 0; }
-.about figure img { border-radius: var(--radius); aspect-ratio: 773 / 1030; object-fit: cover; width: 100%; }
+.about figure img { aspect-ratio: 773 / 1030; object-fit: cover; width: 100%; }
 .bio { display: grid; gap: 18px; }
 .stats { display: flex; flex-wrap: wrap; gap: 32px; padding-block: 8px; }
 .stat { display: grid; gap: 4px; }
 .stat b { font-variation-settings: var(--wide); font-weight: 800; font-size: var(--step-3); line-height: 1; font-variant-numeric: tabular-nums; }
 .stat span { font-size: var(--step--1); color: var(--ink-2); }
 .about .career, .about .more { grid-column: 1 / -1; }
-.career { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line); font-size: var(--step--1); }
+.career::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--aqua-ink); transform-origin: top center; }
+.career { position: relative; list-style: none; margin: 0; padding: 0 0 0 18px; display: grid; border-top: 1px solid var(--line); font-size: var(--step--1); }
 .career li { display: grid; grid-template-columns: 78px 1fr; gap: 12px; padding-block: 11px; border-bottom: 1px solid var(--line); }
 .career time { font-weight: 650; font-variant-numeric: tabular-nums; }
 
@@ -302,7 +370,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="hero-bg" aria-hidden="true"><img src="assets/img/hero-swimmer.jpg" alt="" width="1732" height="1155" fetchpriority="high"></div>
     <div class="wrap">
       <div class="hero-copy">
-        <h1>Swim better, at any&nbsp;level.</h1>
+        <h1><span class="line"><span>Swim better,</span></span> <span class="line"><span>at any&nbsp;level.</span></span></h1>
         <p class="lede">Masters squads and private lessons in Sydney with Lisa Marangon, former professional triathlete. Beginners to advanced, all year&nbsp;round.</p>
         <div class="ctas">
           <a class="btn btn-primary" href="#squads">See squad times</a>
@@ -351,7 +419,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <a class="btn btn-primary" href="#contact" data-topic="Squads">Join a squad</a>
         </div>
         <div class="pool">
-          <img src="assets/img/prince-alfred-pool.jpg" alt="The 50-metre outdoor pool at Prince Alfred Park, with yellow shade umbrellas" width="495" height="400" loading="lazy">
+          <button class="zoom" type="button" aria-label="Enlarge photo of Prince Alfred Park Pool"><img src="assets/img/prince-alfred-pool.jpg" alt="The 50-metre outdoor pool at Prince Alfred Park, with yellow shade umbrellas" width="495" height="400" loading="lazy"><span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span></button>
           <p>All squads swim at Prince Alfred Park Pool, Chalmers Street, Surry Hills: a heated 50-metre outdoor pool, a short walk from Central&nbsp;Station.<br><a href="https://www.google.com/maps/search/?api=1&amp;query=Prince+Alfred+Park+Pool+Surry+Hills" target="_blank" rel="noopener">Get directions</a></p>
         </div>
       </div>
@@ -365,7 +433,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <p>One-to-one coaching, built around exactly what you&nbsp;need.</p>
       </div>
       <div class="body">
-        <figure><img src="assets/img/pool-lanes.jpg" alt="Aerial view of a swimmer doing freestyle between lane ropes in an outdoor pool" width="1500" height="1000" loading="lazy"></figure>
+        <figure><button class="zoom" type="button" aria-label="Enlarge aerial photo of a swimmer between lane ropes"><img src="assets/img/pool-lanes.jpg" alt="Aerial view of a swimmer doing freestyle between lane ropes in an outdoor pool" width="1500" height="1000" loading="lazy"><span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span></button></figure>
         <div class="lesson-copy">
           <p>Private lessons run all year for every age and level: complete beginners, swimmers who want to improve their technique or learn a new stroke, and advanced swimmers looking for specific&nbsp;tips.</p>
           <p>Lisa focuses on form and body movement, so you swim injury-free and feel comfortable in the water, whatever the&nbsp;stroke.</p>
@@ -387,7 +455,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <p>Swim teacher since she was 17, and a former professional&nbsp;triathlete.</p>
       </div>
       <div class="body">
-        <figure><img src="assets/img/lisa.jpg" alt="Lisa Marangon smiling on a pool deck in a cap and swimsuit" width="773" height="1030" loading="lazy"></figure>
+        <figure><button class="zoom" type="button" aria-label="Enlarge photo of Lisa Marangon"><img src="assets/img/lisa.jpg" alt="Lisa Marangon smiling on a pool deck in a cap and swimsuit" width="773" height="1030" loading="lazy"><span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span></button></figure>
         <div class="bio">
           <p>I learned to swim properly at 13 and got fast very quickly. I was always an active kid and good at every sport I tried. In my HSC year my local squad coach asked if I'd like to teach swimming, and at 17 my career began. I started with children, then moved on to coaching adults as my experience grew. I practise what I&nbsp;preach.</p>
           <p>I'm passionate about getting the best out of every swimmer, child or adult, at any level. To this day I still get goosebumps: nothing makes me happier than sharing what I know and helping people find the best in themselves. I raced triathlon at a high level for several years. Now I focus on helping others reach their swimming&nbsp;goals.</p>
@@ -440,6 +508,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </section>
 </main>
 
+<dialog class="lightbox" id="lightbox" aria-label="Photo">
+  <figure><img id="lb-img" src="" alt=""><figcaption id="lb-cap"></figcaption></figure>
+  <button class="lb-close" type="button" aria-label="Close photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</dialog>
+
 <footer>
   <div class="wrap">
     <a class="mark" href="#top">magic<span>masters</span></a>
@@ -480,6 +553,42 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   });
   if (mq.addEventListener) mq.addEventListener("change", paint);
   paint();
+})();
+</script>
+<script>
+// Tap-to-enlarge photos. The native <dialog> handles focus, Escape and screen readers;
+// where View Transitions exist the photo also grows out of its spot on the page.
+(function () {
+  var dlg = document.getElementById("lightbox"), big = document.getElementById("lb-img"), cap = document.getElementById("lb-cap");
+  var root = document.documentElement, still = window.matchMedia("(prefers-reduced-motion: reduce)"), thumb = null;
+  function morph(update, after) {
+    if (!document.startViewTransition || still.matches) { update(); after(); return; }
+    root.classList.add("lb-vt"); dlg.classList.add("vt");
+    var done = false;
+    var vt = document.startViewTransition(function () { done = true; update(); });
+    // Safety net: if the browser never paints the transition, finish without it.
+    setTimeout(function () { if (!done) { vt.skipTransition(); update(); } }, 400);
+    vt.ready.catch(function () {});
+    vt.finished.catch(function () {}).then(function () { root.classList.remove("lb-vt"); dlg.classList.remove("vt"); after(); });
+  }
+  function open(btn) {
+    thumb = btn.querySelector("img");
+    big.src = thumb.currentSrc || thumb.src; big.alt = thumb.alt; cap.textContent = thumb.alt;
+    thumb.style.viewTransitionName = "lb-photo";
+    morph(function () { thumb.style.viewTransitionName = ""; big.style.viewTransitionName = "lb-photo"; if (!dlg.open) dlg.showModal(); },
+          function () { big.style.viewTransitionName = ""; });
+  }
+  function close() {
+    if (!dlg.open) return;
+    var t = thumb;
+    big.style.viewTransitionName = "lb-photo";
+    morph(function () { big.style.viewTransitionName = ""; if (t) t.style.viewTransitionName = "lb-photo"; if (dlg.open) dlg.close(); },
+          function () { if (t) t.style.viewTransitionName = ""; });
+  }
+  document.querySelectorAll(".zoom").forEach(function (btn) { btn.addEventListener("click", function () { open(btn); }); });
+  dlg.querySelector(".lb-close").addEventListener("click", close);
+  dlg.addEventListener("click", function (e) { if (e.target === dlg || e.target === big) close(); });
+  dlg.addEventListener("cancel", function (e) { e.preventDefault(); close(); });
 })();
 </script>
 <script>
