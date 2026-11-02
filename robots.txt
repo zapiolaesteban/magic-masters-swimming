@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://magicmastersswimming.com.au/sitemap.xml
